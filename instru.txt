@@ -1,0 +1,146 @@
+init env : npm install dotenv
+copie dans app.js : require("dotenv").config();
+
+Ouvre un terminal dans le répertoire où se trouve le fichier, ouvre un client MySQL dans ton terminal (avec la commande mysql). Crée une nouvelle base de données appelée express_quests avec CREATE DATABASE puis sélectionne cette base de données avec USE :
+
+CREATE DATABASE express_quests;
+USE express_quests;
+
+Et source le fichier pour créer les tables, pour copier/coller
+
+source express_quests.sql
+
+voir si tout la avec select * from movies;
+
+on quitte ensuite avec EXISTS
+--------
+
+Module MySQL sous node
+npm install mysql2
+
+Configurer l'accès à la base de données
+Pour configurer le package afin d'accéder à la base de données, tu dois ajouter des variables à ton fichier .env, avec toutes les informations nécessaires pour te connecter à la base de données :
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=REPLACE_WITH_YOUR_USERNAME
+DB_PASSWORD=REPLACE_WITH_YOUR_PASSWORD
+DB_NAME=REPLACE_BY_DB_NAME
+
+Ton fichier .env.sample doit toujours refléter le vrai fichier .env, mais toujours avec des exemples de valeurs, et non avec des vraies valeurs.
+
+require("dotenv").config();
+Ensuite, importe le package mysql2 :
+
+const mysql = require("mysql2/promise");
+
+Enfin, utilise mysql.createPool pour préparer un pool de connexion à l'aide des variables d'environnement que tu viens de créer :
+
+require("dotenv").config();
+
+const mysql = require("mysql2/promise");
+
+const database = mysql.createPool({
+  host: process.env.DB_HOST, // address of the server
+  port: process.env.DB_PORT, // port of the DB server (mysql), not to be confused with the APP_PORT !
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
+Tu peux essayer d'obtenir une première connexion depuis le pool pour vérifier que tout va bien :
+
+database
+  .getConnection()
+  .then(() => {
+    console.log("Can reach database");
+  })
+  .catch((err) => {
+    console.error(err);
+  });
+
+  Et lancez la commande suivante :
+
+npx nodemon database.js
+----
+
+ERREUR (ECONNREFUSED), il fallait ajouter une socketPath 
+
+Execute the following query in MYSQL Workbench
+
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+
+Where root as your user localhost as your URL and password as your password
+
+Then run this query to refresh privileges:
+
+flush privileges;
+
+Try connecting using node after you do so.
+
+If that doesn't work, try it without @'localhost' part.
+--------
+
+En utilisant notre objet database, nous pouvons envoyer des requêtes à notre serveur MySQL en utilisant la méthode query().
+La méthode a besoin d'une chaîne de caractères comme premier paramètre : le code SQL de notre requête.
+Puisque nous utilisons la version avec des promesses, nous devrons chaîner l'appel à query() avec un .then() (et un .catch() pour intercepter les erreurs).
+
+Dans database.js essaye les lignes suivantes :
+
+database
+  .query("select * from movies")
+  .then((result) => {
+    console.log(result);
+  })
+  .catch((err) => {
+    console.error(err);
+  });
+
+  // require("dotenv").config();
+
+// const mysql = require("mysql2/promise");
+
+// const database = mysql.createPool({
+//   host: process.env.DB_HOST, // address of the server
+//   port: process.env.DB_PORT, // port of the DB server (mysql), not to be confused with the APP_PORT !
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DB_NAME,
+// });
+
+// database   // Verifie si datbase connectée
+//   .getConnection()
+//   .then(() => {
+//     console.log("Can reach database");
+//   })
+//   .catch((err) => {
+//     console.error(err);
+//   });
+
+// database // Donne les résulats de la requete
+//   .query("select * from movies")
+//   .then((result) => {
+//     console.log(result);
+//   })
+//   .catch((err) => {
+//     console.error(err);
+//   });
+
+//   database
+//   .query("select * from movies")
+//   .then((result) => {
+//     const movies = result[0];
+//     console.log(movies);
+//   })
+//   .catch((err) => {
+//     console.error(err);
+//   });
+
+// database  // Ou, en utilisant la déstructuration de tableau :
+//   .query("select * from movies")
+//   .then(([movies]) => {
+//     console.log(movies);
+//   })
+//   .catch((err) => {
+//     console.error(err);
+//   });
